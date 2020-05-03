@@ -5,7 +5,7 @@ import sys
 from PyQt5 import QtSql
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QWidget, QTabWidget, \
-    QTableView, QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton
+    QTableView, QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QListView
 
 app = QApplication(sys.argv)
 
@@ -40,7 +40,7 @@ def find_all_students():
 class Tabs(QTabWidget):
     def __init__(self, parent=None):
         super(Tabs, self).__init__(parent)
-        self.repture = QLineEdit()
+        # self.repture = QLineEdit()
         self.eleve = QWidget()
         self.classe = QWidget()
         self.biography = QWidget()
@@ -51,7 +51,7 @@ class Tabs(QTabWidget):
         self.addTab(self.statistics, 'statistiques')
         self.eleveui()
         # self.biographyUI()
-        # self.classeUI()
+        self.classeui()
         # self.statisticsUI()
 
     def eleveui(self):
@@ -77,6 +77,7 @@ class Tabs(QTabWidget):
         birth_date = QLineEdit()
         inscription = QLineEdit()
         current = QCheckBox()
+        repture = QLineEdit()
         sex = QComboBox()
         sex.addItem("Male")
         sex.addItem("Femelle")
@@ -89,22 +90,45 @@ class Tabs(QTabWidget):
         form.addRow("nom du père: ", father_name)
         form.addRow("date d'inscription: ", inscription)
         form.addRow("présent: ", current)
-        form.addRow("date de repture: ", self.repture)
+        form.addRow("date de repture: ", repture)
         buttons.addWidget(add)
         buttons.addWidget(persist)
         buttons.addWidget(delete)
         form.addRow(buttons)
-        current.stateChanged.connect(lambda: self.set_repture(current))
+        current.stateChanged.connect(
+            lambda: repture.setDisabled(True) if current.isChecked() else repture.setDisabled(False)
+        )
         form.setVerticalSpacing(30)
         layout.addWidget(view)
         layout.addLayout(form)
         self.eleve.setLayout(layout)
 
-    def set_repture(self, btn):
-        if btn.isChecked():
-            self.repture.setDisabled(True)
-        else:
-            self.repture.setDisabled(False)
+    def classeui(self):
+        layout = QFormLayout()
+        buttons = QHBoxLayout()
+        sort = QPushButton("trier les élèves")
+        delete = QPushButton("supprimer classe")
+        add = QPushButton("ajouter classe")
+        list_classes = QPushButton("lister les classes")
+        list_students = QPushButton("lister les élèves")
+        buttons.addWidget(list_classes)
+        buttons.addWidget(list_students)
+        buttons.addWidget(add)
+        buttons.addWidget(delete)
+        buttons.addWidget(sort)
+        level = QComboBox()
+        level.addItem('')
+        level.addItem("7ème année")
+        level.addItem("8ème année")
+        level.addItem("9ème année")
+        level.currentTextChanged.connect(lambda: print(level.currentText()))
+        classe = QComboBox()
+        result = QListView()
+        layout.addRow("Niveau: ", level)
+        layout.addRow("Classe: ", classe)
+        layout.addRow(buttons)
+        layout.addRow("Liste: ", result)
+        self.classe.setLayout(layout)
 
 
 main = MainWindow()
