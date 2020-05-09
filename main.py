@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import sqlite3
 
-from PyQt5 import QtSql
+from PyQt5 import QtSql, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QWidget, QTabWidget, \
-    QTableView, QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QListView
+    QTableView, QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QListView, QTableWidget, QTableWidgetItem
 
 app = QApplication(sys.argv)
 
@@ -34,13 +35,34 @@ class MainWindow(QMainWindow):
 
 
 def find_all_students():
-    pass
+    cursor.execute(''' SELECT * FROM eleve ''')
+    return cursor.fetchall()
+
+
+def display_all_students():
+    liste_eleve = find_all_students()
+    liste = QTableWidget()
+    liste.setRowCount(len(liste_eleve))
+    liste.setColumnCount(len(liste_eleve[1]))
+    for row in range(liste.rowCount()):
+        for column in range(liste.columnCount()):
+            liste.setItem(row, column, QTableWidgetItem(str(liste_eleve[row][column])))
+    return liste
 
 
 class Tabs(QTabWidget):
     def __init__(self, parent=None):
         super(Tabs, self).__init__(parent)
-        # self.repture = QLineEdit()
+        self.repture = QLineEdit()
+        self.current = QCheckBox()
+        self.inscription = QLineEdit()
+        self.birth_date = QLineEdit()
+        self.eleve_classe = QLineEdit()
+        self.last_name = QLineEdit()
+        self.first_name = QLineEdit()
+        self.sex = QComboBox()
+        self.father_name = QLineEdit()
+        self.liste = display_all_students()
         self.eleve = QWidget()
         self.classe = QWidget()
         self.biography = QWidget()
@@ -54,8 +76,33 @@ class Tabs(QTabWidget):
         self.classeui()
         # self.statisticsUI()
 
+    def function(self):
+        index = self.liste.currentIndex()
+        new_index1 = self.liste.model().index(index.row(), 1)
+        new_index2 = self.liste.model().index(index.row(), 2)
+        new_index3 = self.liste.model().index(index.row(), 3)
+        new_index4 = self.liste.model().index(index.row(), 4)
+        new_index5 = self.liste.model().index(index.row(), 5)
+        new_index6 = self.liste.model().index(index.row(), 6)
+        new_index7 = self.liste.model().index(index.row(), 7)
+        new_index8 = self.liste.model().index(index.row(), 8)
+        new_index9 = self.liste.model().index(index.row(), 9)
+        self.first_name.setText(self.liste.model().data(new_index1))
+        self.last_name.setText(self.liste.model().data(new_index2))
+        self.eleve_classe.setText(self.liste.model().data(new_index3))
+        self.birth_date.setText(self.liste.model().data(new_index5))
+        self.sex.setCurrentText(self.liste.model().data(new_index4))
+        self.father_name.setText(self.liste.model().data(new_index6))
+        self.inscription.setText(self.liste.model().data(new_index7))
+        if self.liste.model().data(new_index8) == 'true':
+            self.current.setChecked(True)
+        else:
+            self.current.setChecked(False)
+        if not self.current.isChecked():
+            self.repture.setText(self.liste.model().data(new_index9))
+
     def eleveui(self):
-        find_all_students()
+        self.liste.cellClicked.connect(self.function)
         layout = QHBoxLayout()
         buttons = QHBoxLayout()
         form = QFormLayout()
@@ -65,41 +112,26 @@ class Tabs(QTabWidget):
         add.setDisabled(True)
         persist.setDisabled(True)
         delete.setDisabled(True)
-        model = QtSql.QSqlTableModel()
-        model.setHeaderData(0, Qt.Horizontal,  "ID")
-        model.setHeaderData(1, Qt.Horizontal, "First name")
-        model.setHeaderData(2, Qt.Horizontal, "Last name")
-        view = QTableView()
-        view.setModel(model)
-        first_name = QLineEdit()
-        last_name = QLineEdit()
-        classe = QLineEdit()
-        birth_date = QLineEdit()
-        inscription = QLineEdit()
-        current = QCheckBox()
-        repture = QLineEdit()
-        sex = QComboBox()
-        sex.addItem("Male")
-        sex.addItem("Femelle")
-        father_name = QLineEdit()
-        form.addRow("nom: ", first_name)
-        form.addRow("prénom: ", last_name)
-        form.addRow("classe: ", classe)
-        form.addRow("date de naissance: ", birth_date)
-        form.addRow("sexe: ", sex)
-        form.addRow("nom du père: ", father_name)
-        form.addRow("date d'inscription: ", inscription)
-        form.addRow("présent: ", current)
-        form.addRow("date de repture: ", repture)
+        self.sex.addItem("Male")
+        self.sex.addItem("Femelle")
+        form.addRow("nom: ", self.first_name)
+        form.addRow("prénom: ", self.last_name)
+        form.addRow("classe: ", self.eleve_classe)
+        form.addRow("date de naissance: ", self.birth_date)
+        form.addRow("sexe: ", self.sex)
+        form.addRow("nom du père: ", self.father_name)
+        form.addRow("date d'inscription: ", self.inscription)
+        form.addRow("présent: ", self.current)
+        form.addRow("date de repture: ", self.repture)
         buttons.addWidget(add)
         buttons.addWidget(persist)
         buttons.addWidget(delete)
         form.addRow(buttons)
-        current.stateChanged.connect(
-            lambda: repture.setDisabled(True) if current.isChecked() else repture.setDisabled(False)
+        self.current.stateChanged.connect(
+            lambda: self.repture.setDisabled(True) if self.current.isChecked() else self.repture.setDisabled(False)
         )
         form.setVerticalSpacing(30)
-        layout.addWidget(view)
+        layout.addWidget(self.liste)
         layout.addLayout(form)
         self.eleve.setLayout(layout)
 
@@ -130,6 +162,27 @@ class Tabs(QTabWidget):
         layout.addRow("Liste: ", result)
         self.classe.setLayout(layout)
 
+
+db = sqlite3.connect('office.sqlite')
+cursor = db.cursor()
+cursor.execute(''' CREATE TABLE IF NOT EXISTS classe(
+nom_classe varchar PRIMARY KEY ,
+niveau varchar ,
+nbr_eleve integer 
+) ''')
+
+cursor.execute(''' CREATE TABLE IF NOT EXISTS eleve(
+id integer PRIMARY KEY AUTOINCREMENT ,
+nom varchar ,
+prenom varchar ,
+classe varchar REFERENCES classe(nom_classe) ,
+sexe varchar ,
+date_naissance varchar ,
+nom_pere varchar ,
+date_inscription varchar ,
+present varchar ,
+date_repture varchar 
+) ''')
 
 main = MainWindow()
 main.setGeometry(0, 0, 1200, 1000)
