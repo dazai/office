@@ -37,20 +37,6 @@ def find_all_students():
     return cursor.fetchall()
 
 
-def display_all_students():
-    liste_eleve = find_all_students()
-    print(liste_eleve)
-    liste = QTableWidget()
-    if len(liste_eleve) > 0:
-        liste.setRowCount(len(liste_eleve))
-        liste.setColumnCount(len(liste_eleve[0]))
-        for row in range(liste.rowCount()):
-            for column in range(liste.columnCount()):
-                liste.setItem(row, column, QTableWidgetItem(str(liste_eleve[row][column])))
-        return liste
-    return QTableWidget()
-
-
 class Tabs(QTabWidget):
     def __init__(self, parent=None):
         super(Tabs, self).__init__(parent)
@@ -71,7 +57,9 @@ class Tabs(QTabWidget):
         self.first_name = QLineEdit()
         self.sex = QComboBox()
         self.father_name = QLineEdit()
-        self.liste = display_all_students()
+        # self.decision = QComboBox()
+        self.liste = QTableWidget()
+        self.display_all_students()
         self.eleve = QWidget()
         self.classe = QWidget()
         self.biography = QWidget()
@@ -84,6 +72,15 @@ class Tabs(QTabWidget):
         # self.biographyUI()
         self.classeui()
         # self.statisticsUI()
+
+    def display_all_students(self):
+        liste_eleve = find_all_students()
+        if len(liste_eleve) > 0:
+            self.liste.setRowCount(len(liste_eleve))
+            self.liste.setColumnCount(len(liste_eleve[0]))
+            for row in range(self.liste.rowCount()):
+                for column in range(self.liste.columnCount()):
+                    self.liste.setItem(row, column, QTableWidgetItem(str(liste_eleve[row][column])))
 
     def display_info(self):
         index = self.liste.currentIndex()
@@ -138,6 +135,8 @@ class Tabs(QTabWidget):
 
     def eleveui(self):
         self.liste.cellClicked.connect(self.display_info)
+        refresh = QPushButton("Refresh")
+        refresh.clicked.connect(self.display_all_students)
         buttons = QHBoxLayout()
         form = QFormLayout()
         self.save.setDisabled(True)
@@ -147,6 +146,11 @@ class Tabs(QTabWidget):
         self.add.clicked.connect(self.persist)
         self.sex.addItem("Male")
         self.sex.addItem("Femelle")
+        # self.decision.addItem("")
+        # self.decision.addItem("Admis")
+        # self.decision.addItem("Admis-")
+        # self.decision.addItem("Redouble")
+        # self.decision.addItem("Exclus")
         form.addRow("nom: ", self.last_name)
         form.addRow("prénom: ", self.first_name)
         form.addRow("classe: ", self.eleve_classe)
@@ -154,11 +158,13 @@ class Tabs(QTabWidget):
         form.addRow("sexe: ", self.sex)
         form.addRow("nom du père: ", self.father_name)
         form.addRow("date d'inscription: ", self.inscription)
+        # form.addRow("décision de la jury: ", self.decision)
         form.addRow("présent: ", self.current)
         form.addRow("date de repture: ", self.repture)
         buttons.addWidget(self.add)
         buttons.addWidget(self.save)
         buttons.addWidget(self.delete)
+        buttons.addWidget(refresh)
         form.addRow(buttons)
         self.current.stateChanged.connect(
             lambda: self.repture.setDisabled(True) if self.current.isChecked() else self.repture.setDisabled(False)
