@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import sqlite3
+import sys
 
-from PyQt5 import QtSql, QtGui
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QWidget, QTabWidget, \
-    QTableView, QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QListView, QTableWidget, QTableWidgetItem
+    QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QTableWidget, QTableWidgetItem
 
 app = QApplication(sys.argv)
 
@@ -41,18 +39,29 @@ def find_all_students():
 
 def display_all_students():
     liste_eleve = find_all_students()
+    print(liste_eleve)
     liste = QTableWidget()
-    liste.setRowCount(len(liste_eleve))
-    liste.setColumnCount(len(liste_eleve[1]))
-    for row in range(liste.rowCount()):
-        for column in range(liste.columnCount()):
-            liste.setItem(row, column, QTableWidgetItem(str(liste_eleve[row][column])))
-    return liste
+    if len(liste_eleve) > 0:
+        liste.setRowCount(len(liste_eleve))
+        liste.setColumnCount(len(liste_eleve[0]))
+        for row in range(liste.rowCount()):
+            for column in range(liste.columnCount()):
+                liste.setItem(row, column, QTableWidgetItem(str(liste_eleve[row][column])))
+        return liste
+    return QTableWidget()
 
 
 class Tabs(QTabWidget):
     def __init__(self, parent=None):
         super(Tabs, self).__init__(parent)
+        self.classe_list = QComboBox()
+        self.level = QComboBox()
+        self.result = QTableWidget()
+        self.layout = QHBoxLayout()
+        self.student_id = 0
+        self.delete = QPushButton('supprimer élève')
+        self.save = QPushButton('sauvegarder')
+        self.add = QPushButton('ajouter élève')
         self.repture = QLineEdit()
         self.current = QCheckBox()
         self.inscription = QLineEdit()
@@ -76,8 +85,9 @@ class Tabs(QTabWidget):
         self.classeui()
         # self.statisticsUI()
 
-    def function(self):
+    def display_info(self):
         index = self.liste.currentIndex()
+        new_index = self.liste.model().index(index.row(), 0)
         new_index1 = self.liste.model().index(index.row(), 1)
         new_index2 = self.liste.model().index(index.row(), 2)
         new_index3 = self.liste.model().index(index.row(), 3)
@@ -87,8 +97,9 @@ class Tabs(QTabWidget):
         new_index7 = self.liste.model().index(index.row(), 7)
         new_index8 = self.liste.model().index(index.row(), 8)
         new_index9 = self.liste.model().index(index.row(), 9)
-        self.first_name.setText(self.liste.model().data(new_index1))
-        self.last_name.setText(self.liste.model().data(new_index2))
+        self.student_id = int(self.liste.model().data(new_index))
+        self.last_name.setText(self.liste.model().data(new_index1))
+        self.first_name.setText(self.liste.model().data(new_index2))
         self.eleve_classe.setText(self.liste.model().data(new_index3))
         self.birth_date.setText(self.liste.model().data(new_index5))
         self.sex.setCurrentText(self.liste.model().data(new_index4))
@@ -96,26 +107,48 @@ class Tabs(QTabWidget):
         self.inscription.setText(self.liste.model().data(new_index7))
         if self.liste.model().data(new_index8) == 'true':
             self.current.setChecked(True)
+            self.repture.setText('')
         else:
             self.current.setChecked(False)
         if not self.current.isChecked():
             self.repture.setText(self.liste.model().data(new_index9))
+        self.save.setDisabled(False)
+        self.delete.setDisabled(False)
+
+    def save_change(self):
+        s = str(self.current.isChecked())
+        data = (self.last_name.text(), self.first_name.text(), self.eleve_classe.text(), self.sex.currentText(),
+                self.birth_date.text(), self.father_name.text(), self.inscription.text(), s.lower(),
+                self.repture.text(), self.student_id)
+        cursor.execute(''' UPDATE eleve SET nom = ?, prenom = ?, classe = ?, sexe = ?, date_naissance = ?, 
+         nom_pere = ?, date_inscription = ?, present = ?, date_repture = ? WHERE id = ? ''', data)
+        db.commit()
+
+    def delete_student(self):
+        print(self.student_id)
+        cursor.execute(''' DELETE FROM eleve WHERE id = ? ''', (self.student_id,))
+        db.commit()
+
+    def persist(self):
+        data = (None, self.last_name.text(), self.first_name.text(), self.eleve_classe.text(), self.sex.currentText(),
+                self.birth_date.text(), self.father_name.text(), self.inscription.text(),
+                str(self.current.isChecked()).lower(), self.repture.text())
+        cursor.execute(''' INSERT INTO eleve VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ''', data)
+        db.commit()
 
     def eleveui(self):
-        self.liste.cellClicked.connect(self.function)
-        layout = QHBoxLayout()
+        self.liste.cellClicked.connect(self.display_info)
         buttons = QHBoxLayout()
         form = QFormLayout()
-        add = QPushButton('ajouter élève')
-        persist = QPushButton('sauvegarder')
-        delete = QPushButton('supprimer élève')
-        add.setDisabled(True)
-        persist.setDisabled(True)
-        delete.setDisabled(True)
+        self.save.setDisabled(True)
+        self.delete.setDisabled(True)
+        self.save.clicked.connect(self.save_change)
+        self.delete.clicked.connect(self.delete_student)
+        self.add.clicked.connect(self.persist)
         self.sex.addItem("Male")
         self.sex.addItem("Femelle")
-        form.addRow("nom: ", self.first_name)
-        form.addRow("prénom: ", self.last_name)
+        form.addRow("nom: ", self.last_name)
+        form.addRow("prénom: ", self.first_name)
         form.addRow("classe: ", self.eleve_classe)
         form.addRow("date de naissance: ", self.birth_date)
         form.addRow("sexe: ", self.sex)
@@ -123,17 +156,42 @@ class Tabs(QTabWidget):
         form.addRow("date d'inscription: ", self.inscription)
         form.addRow("présent: ", self.current)
         form.addRow("date de repture: ", self.repture)
-        buttons.addWidget(add)
-        buttons.addWidget(persist)
-        buttons.addWidget(delete)
+        buttons.addWidget(self.add)
+        buttons.addWidget(self.save)
+        buttons.addWidget(self.delete)
         form.addRow(buttons)
         self.current.stateChanged.connect(
             lambda: self.repture.setDisabled(True) if self.current.isChecked() else self.repture.setDisabled(False)
         )
         form.setVerticalSpacing(30)
-        layout.addWidget(self.liste)
-        layout.addLayout(form)
-        self.eleve.setLayout(layout)
+        self.layout.addWidget(self.liste)
+        self.layout.addLayout(form)
+        self.eleve.setLayout(self.layout)
+
+    def add_elements(self):
+        if self.level.currentText() == '':
+            cursor.execute(''' SELECT nom_classe FROM classe ''')
+        else:
+            cursor.execute(''' SELECT nom_classe FROM classe WHERE niveau = ?''', (self.level.currentText(), ))
+        list_classe = cursor.fetchall()
+        for i in range(self.classe_list.count()):
+            self.classe_list.removeItem(0)
+        for e in list_classe:
+            self.classe_list.addItem(e[0])
+
+    def find_students_by_class(self):
+        classe = self.classe_list.currentText()
+        cursor.execute(''' SELECT * FROM eleve WHERE classe = ? ''', (classe,))
+        return cursor.fetchall()
+
+    def display_students_by_class(self):
+        liste_eleve = self.find_students_by_class()
+        if len(liste_eleve) > 0:
+            self.result.setRowCount(len(liste_eleve))
+            self.result.setColumnCount(len(liste_eleve[0]))
+            for row in range(self.result.rowCount()):
+                for column in range(self.result.columnCount()):
+                    self.result.setItem(row, column, QTableWidgetItem(str(liste_eleve[row][column])))
 
     def classeui(self):
         layout = QFormLayout()
@@ -148,18 +206,16 @@ class Tabs(QTabWidget):
         buttons.addWidget(add)
         buttons.addWidget(delete)
         buttons.addWidget(sort)
-        level = QComboBox()
-        level.addItem('')
-        level.addItem("7ème année")
-        level.addItem("8ème année")
-        level.addItem("9ème année")
-        level.currentTextChanged.connect(lambda: print(level.currentText()))
-        classe = QComboBox()
-        result = QListView()
-        layout.addRow("Niveau: ", level)
-        layout.addRow("Classe: ", classe)
+        self.level.addItem('')
+        self.level.addItem("7ème année")
+        self.level.addItem("8ème année")
+        self.level.addItem("9ème année")
+        self.level.currentTextChanged.connect(self.add_elements)
+        self.classe_list.currentTextChanged.connect(self.display_students_by_class)
+        layout.addRow("Niveau: ", self.level)
+        layout.addRow("Classe: ", self.classe_list)
         layout.addRow(buttons)
-        layout.addRow("Liste: ", result)
+        layout.addRow("Liste: ", self.result)
         self.classe.setLayout(layout)
 
 
