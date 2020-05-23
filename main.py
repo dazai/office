@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-
 import sqlite3
 import sys
+from fpdf import FPDF
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QWidget, QTabWidget, \
     QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QTableWidget, QTableWidgetItem
@@ -57,7 +57,7 @@ class Tabs(QTabWidget):
         self.first_name = QLineEdit()
         self.sex = QComboBox()
         self.father_name = QLineEdit()
-        # self.decision = QComboBox()
+        self.decision = QComboBox()
         self.liste = QTableWidget()
         self.display_all_students()
         self.eleve = QWidget()
@@ -94,6 +94,7 @@ class Tabs(QTabWidget):
         new_index7 = self.liste.model().index(index.row(), 7)
         new_index8 = self.liste.model().index(index.row(), 8)
         new_index9 = self.liste.model().index(index.row(), 9)
+        new_index10 = self.liste.model().index(index.row(), 10)
         self.student_id = int(self.liste.model().data(new_index))
         self.last_name.setText(self.liste.model().data(new_index1))
         self.first_name.setText(self.liste.model().data(new_index2))
@@ -109,6 +110,7 @@ class Tabs(QTabWidget):
             self.current.setChecked(False)
         if not self.current.isChecked():
             self.repture.setText(self.liste.model().data(new_index9))
+        self.decision.setCurrentText(self.liste.model().data(new_index10))
         self.save.setDisabled(False)
         self.delete.setDisabled(False)
 
@@ -116,9 +118,9 @@ class Tabs(QTabWidget):
         s = str(self.current.isChecked())
         data = (self.last_name.text(), self.first_name.text(), self.eleve_classe.text(), self.sex.currentText(),
                 self.birth_date.text(), self.father_name.text(), self.inscription.text(), s.lower(),
-                self.repture.text(), self.student_id)
+                self.repture.text(), self.decision, self.student_id)
         cursor.execute(''' UPDATE eleve SET nom = ?, prenom = ?, classe = ?, sexe = ?, date_naissance = ?, 
-         nom_pere = ?, date_inscription = ?, present = ?, date_repture = ? WHERE id = ? ''', data)
+         nom_pere = ?, date_inscription = ?, present = ?, date_repture = ?, decision = ? WHERE id = ? ''', data)
         db.commit()
 
     def delete_student(self):
@@ -129,8 +131,8 @@ class Tabs(QTabWidget):
     def persist(self):
         data = (None, self.last_name.text(), self.first_name.text(), self.eleve_classe.text(), self.sex.currentText(),
                 self.birth_date.text(), self.father_name.text(), self.inscription.text(),
-                str(self.current.isChecked()).lower(), self.repture.text())
-        cursor.execute(''' INSERT INTO eleve VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ''', data)
+                str(self.current.isChecked()).lower(), self.repture.text(), self.decision)
+        cursor.execute(''' INSERT INTO eleve VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ''', data)
         db.commit()
 
     def eleveui(self):
@@ -146,11 +148,11 @@ class Tabs(QTabWidget):
         self.add.clicked.connect(self.persist)
         self.sex.addItem("Male")
         self.sex.addItem("Femelle")
-        # self.decision.addItem("")
-        # self.decision.addItem("Admis")
-        # self.decision.addItem("Admis-")
-        # self.decision.addItem("Redouble")
-        # self.decision.addItem("Exclus")
+        self.decision.addItem("")
+        self.decision.addItem("Admis")
+        self.decision.addItem("Admis-")
+        self.decision.addItem("Redouble")
+        self.decision.addItem("Exclus")
         form.addRow("nom: ", self.last_name)
         form.addRow("prénom: ", self.first_name)
         form.addRow("classe: ", self.eleve_classe)
@@ -158,7 +160,7 @@ class Tabs(QTabWidget):
         form.addRow("sexe: ", self.sex)
         form.addRow("nom du père: ", self.father_name)
         form.addRow("date d'inscription: ", self.inscription)
-        # form.addRow("décision de la jury: ", self.decision)
+        form.addRow("décision de la jury: ", self.decision)
         form.addRow("présent: ", self.current)
         form.addRow("date de repture: ", self.repture)
         buttons.addWidget(self.add)
@@ -187,8 +189,9 @@ class Tabs(QTabWidget):
 
     def find_students_by_class(self):
         classe = self.classe_list.currentText()
-        cursor.execute(''' SELECT * FROM eleve WHERE classe = ? ''', (classe,))
-        return cursor.fetchall()
+        cursor.execute(''' SELECT nom, prenom FROM eleve WHERE classe = ? ''', (classe,))
+        liste = cursor.fetchall()
+        return sorted(liste, key=lambda t: t)
 
     def display_students_by_class(self):
         liste_eleve = self.find_students_by_class()
@@ -199,15 +202,26 @@ class Tabs(QTabWidget):
                 for column in range(self.result.columnCount()):
                     self.result.setItem(row, column, QTableWidgetItem(str(liste_eleve[row][column])))
 
+    def generate_pdf(self):
+        liste = self.find_students_by_class()
+        pdf_file = FPDF()
+        pdf_file.add_page()
+        pdf_file.set_font("Arial", size=12)
+        for e in liste:
+            pdf_file.cell(20, 5, e[0], ln=0, align="C", border=1)
+            pdf_file.cell(20, 5, e[1], ln=1, align="C", border=1)
+        pdf_file.output(self.classe_list.currentText()+".pdf")
+        pdf_file.close()
+
     def classeui(self):
         layout = QFormLayout()
         buttons = QHBoxLayout()
         sort = QPushButton("trier les élèves")
         delete = QPushButton("supprimer classe")
         add = QPushButton("ajouter classe")
-        list_classes = QPushButton("lister les classes")
+        pdf = QPushButton("générer liste des élèves")
         list_students = QPushButton("lister les élèves")
-        buttons.addWidget(list_classes)
+        buttons.addWidget(pdf)
         buttons.addWidget(list_students)
         buttons.addWidget(add)
         buttons.addWidget(delete)
@@ -218,6 +232,7 @@ class Tabs(QTabWidget):
         self.level.addItem("9ème année")
         self.level.currentTextChanged.connect(self.add_elements)
         self.classe_list.currentTextChanged.connect(self.display_students_by_class)
+        pdf.clicked.connect(self.generate_pdf)
         layout.addRow("Niveau: ", self.level)
         layout.addRow("Classe: ", self.classe_list)
         layout.addRow(buttons)
@@ -243,7 +258,8 @@ date_naissance varchar ,
 nom_pere varchar ,
 date_inscription varchar ,
 present varchar ,
-date_repture varchar 
+date_repture varchar ,
+decision varchar 
 ) ''')
 
 main = MainWindow()
