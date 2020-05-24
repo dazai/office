@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 import sys
-from fpdf import FPDF
 
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QAction, QWidget, QTabWidget, \
-    QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QTableWidget, QTableWidgetItem
+    QLineEdit, QComboBox, QFormLayout, QCheckBox, QPushButton, QTableWidget, QTableWidgetItem, QMessageBox
+from fpdf import FPDF
 
 app = QApplication(sys.argv)
 
@@ -35,6 +36,17 @@ class MainWindow(QMainWindow):
 def find_all_students():
     cursor.execute(''' SELECT * FROM eleve ''')
     return cursor.fetchall()
+
+
+def authentication():
+    if auth.login.text() == "saad sboui" and auth.passwd.text() == "00000000":
+        auth.destroy()
+        main.show()
+    else:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText("Login ou mot de passe incorrect")
+        msg.exec_()
 
 
 class Tabs(QTabWidget):
@@ -208,7 +220,7 @@ class Tabs(QTabWidget):
         pdf_file.add_page()
         pdf_file.set_font("Arial", size=12)
         for e in liste:
-            pdf_file.cell(20, 5, e[0], ln=0, align="C", border=1)
+            pdf_file.cell(100, 5, e[0], ln=0, align="R", border=1)
             pdf_file.cell(20, 5, e[1], ln=1, align="C", border=1)
         pdf_file.output(self.classe_list.currentText()+".pdf")
         pdf_file.close()
@@ -240,6 +252,26 @@ class Tabs(QTabWidget):
         self.classe.setLayout(layout)
 
 
+class Auth(QWidget):
+    def __init__(self):
+        super(Auth, self).__init__()
+        self.form = QFormLayout()
+        self.login = QLineEdit()
+        self.passwd = QLineEdit()
+        self.passwd.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.validate = QPushButton("valider")
+        self.validate.clicked.connect(self.authenticate)
+        self.form.addRow("login: ", self.login)
+        self.form.addRow("mot de passe: ", self.passwd)
+        self.form.addRow(self.validate)
+        self.setWindowTitle("Authentification")
+        self.setLayout(self.form)
+
+    @staticmethod
+    def authenticate():
+        authentication()
+
+
 db = sqlite3.connect('office.sqlite')
 cursor = db.cursor()
 cursor.execute(''' CREATE TABLE IF NOT EXISTS classe(
@@ -262,7 +294,9 @@ date_repture varchar ,
 decision varchar 
 ) ''')
 
+auth = Auth()
+auth.setGeometry(500, 250, 300, 110)
+auth.show()
 main = MainWindow()
 main.setGeometry(0, 0, 1200, 1000)
-main.show()
 sys.exit(app.exec_())
