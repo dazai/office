@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90c734fb-cff4-449d-821b-826b2af2386c" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/office.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/office.sqlite" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,6 +102,10 @@
       <workItem from="1590149939662" duration="1607000" />
       <workItem from="1590220143915" duration="8911000" />
       <workItem from="1590309228270" duration="7329000" />
+      <workItem from="1590396166514" duration="1819000" />
+      <workItem from="1590403184600" duration="61000" />
+      <workItem from="1590427177962" duration="292000" />
+      <workItem from="1590486408264" duration="7160000" />
     </task>
     <servers />
   </component>
@@ -111,6 +118,10 @@
     </ignored-roots>
   </component>
   <component name="WindowStateProjectService">
+    <state x="339" y="79" width="732" height="644" key="#Inspections" timestamp="1590494978673">
+      <screen x="54" y="27" width="1312" height="741" />
+    </state>
+    <state x="339" y="79" width="732" height="644" key="#Inspections/54.27.1312.741@54.27.1312.741" timestamp="1590494978673" />
     <state x="56" y="250" width="1300" height="301" key="#SQL_Dialects" timestamp="1589103598130">
       <screen x="56" y="27" width="1310" height="741" />
     </state>
@@ -123,25 +134,25 @@
       <screen x="54" y="27" width="1312" height="741" />
     </state>
     <state x="388" y="199" width="634" height="403" key="#com.intellij.fileTypes.FileTypeChooser/54.27.1312.741@54.27.1312.741" timestamp="1590310107792" />
-    <state width="1266" height="172" key="GridCell.Tab.0.bottom" timestamp="1590317164253">
+    <state width="1266" height="172" key="GridCell.Tab.0.bottom" timestamp="1590495607144">
       <screen x="54" y="27" width="1312" height="741" />
     </state>
-    <state width="1266" height="172" key="GridCell.Tab.0.bottom/54.27.1312.741@54.27.1312.741" timestamp="1590317164253" />
+    <state width="1266" height="172" key="GridCell.Tab.0.bottom/54.27.1312.741@54.27.1312.741" timestamp="1590495607144" />
     <state width="1264" height="172" key="GridCell.Tab.0.bottom/56.27.1310.741@56.27.1310.741" timestamp="1589108257537" />
-    <state width="1266" height="172" key="GridCell.Tab.0.center" timestamp="1590317164252">
+    <state width="1266" height="172" key="GridCell.Tab.0.center" timestamp="1590495607143">
       <screen x="54" y="27" width="1312" height="741" />
     </state>
-    <state width="1266" height="172" key="GridCell.Tab.0.center/54.27.1312.741@54.27.1312.741" timestamp="1590317164252" />
+    <state width="1266" height="172" key="GridCell.Tab.0.center/54.27.1312.741@54.27.1312.741" timestamp="1590495607143" />
     <state width="1264" height="172" key="GridCell.Tab.0.center/56.27.1310.741@56.27.1310.741" timestamp="1589108257536" />
-    <state width="1266" height="172" key="GridCell.Tab.0.left" timestamp="1590317164252">
+    <state width="1266" height="172" key="GridCell.Tab.0.left" timestamp="1590495607143">
       <screen x="54" y="27" width="1312" height="741" />
     </state>
-    <state width="1266" height="172" key="GridCell.Tab.0.left/54.27.1312.741@54.27.1312.741" timestamp="1590317164252" />
+    <state width="1266" height="172" key="GridCell.Tab.0.left/54.27.1312.741@54.27.1312.741" timestamp="1590495607143" />
     <state width="1264" height="172" key="GridCell.Tab.0.left/56.27.1310.741@56.27.1310.741" timestamp="1589108257536" />
-    <state width="1266" height="172" key="GridCell.Tab.0.right" timestamp="1590317164252">
+    <state width="1266" height="172" key="GridCell.Tab.0.right" timestamp="1590495607143">
       <screen x="54" y="27" width="1312" height="741" />
     </state>
-    <state width="1266" height="172" key="GridCell.Tab.0.right/54.27.1312.741@54.27.1312.741" timestamp="1590317164252" />
+    <state width="1266" height="172" key="GridCell.Tab.0.right/54.27.1312.741@54.27.1312.741" timestamp="1590495607143" />
     <state width="1264" height="172" key="GridCell.Tab.0.right/56.27.1310.741@56.27.1310.741" timestamp="1589108257537" />
     <state x="200" y="31" width="1022" height="737" key="SettingsEditor" timestamp="1589103475365">
       <screen x="56" y="27" width="1310" height="741" />
@@ -153,7 +164,7 @@
     <state x="439" y="128" width="540" height="524" key="StructurePopup/54.27.1312.741@54.27.1312.741" timestamp="1590149377000" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/office$test.coverage" NAME="test Coverage Results" MODIFIED="1590224133040" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/office$main.coverage" NAME="main Coverage Results" MODIFIED="1590317099523" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/office$test.coverage" NAME="test Coverage Results" MODIFIED="1590487300701" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/office$main.coverage" NAME="main Coverage Results" MODIFIED="1590495544485" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

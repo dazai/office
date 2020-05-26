@@ -38,17 +38,6 @@ def find_all_students():
     return cursor.fetchall()
 
 
-def authentication():
-    if auth.login.text() == "saad sboui" and auth.passwd.text() == "00000000":
-        auth.destroy()
-        main.show()
-    else:
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Warning)
-        msg.setText("Login ou mot de passe incorrect")
-        msg.exec_()
-
-
 class Tabs(QTabWidget):
     def __init__(self, parent=None):
         super(Tabs, self).__init__(parent)
@@ -83,7 +72,7 @@ class Tabs(QTabWidget):
         self.eleveui()
         # self.biographyUI()
         self.classeui()
-        # self.statisticsUI()
+        self.statisticsui()
 
     def display_all_students(self):
         liste_eleve = find_all_students()
@@ -225,6 +214,16 @@ class Tabs(QTabWidget):
         pdf_file.output(self.classe_list.currentText()+".pdf")
         pdf_file.close()
 
+    def delete_classe(self):
+        classe = self.classe_list.currentText()
+        cursor.execute(''' DELETE FROM eleve WHERE classe = ? ''', (classe,))
+        cursor.execute(''' DELETE FROM classe WHERE nom_classe = ? ''', (classe,))
+        db.commit()
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Classe supprimé avec succès")
+        msg.exec_()
+
     def classeui(self):
         layout = QFormLayout()
         buttons = QHBoxLayout()
@@ -233,6 +232,8 @@ class Tabs(QTabWidget):
         add = QPushButton("ajouter classe")
         pdf = QPushButton("générer liste des élèves")
         list_students = QPushButton("lister les élèves")
+        add.clicked.connect(add_class)
+        delete.clicked.connect(self.delete_classe)
         buttons.addWidget(pdf)
         buttons.addWidget(list_students)
         buttons.addWidget(add)
@@ -251,6 +252,12 @@ class Tabs(QTabWidget):
         layout.addRow("Liste: ", self.result)
         self.classe.setLayout(layout)
 
+    def get_stats(self):
+        pass
+
+    def statisticsui(self):
+        pass
+
 
 class Auth(QWidget):
     def __init__(self):
@@ -260,6 +267,7 @@ class Auth(QWidget):
         self.passwd = QLineEdit()
         self.passwd.setEchoMode(QtWidgets.QLineEdit.Password)
         self.validate = QPushButton("valider")
+        self.validate.setShortcut("Return")
         self.validate.clicked.connect(self.authenticate)
         self.form.addRow("login: ", self.login)
         self.form.addRow("mot de passe: ", self.passwd)
@@ -270,6 +278,58 @@ class Auth(QWidget):
     @staticmethod
     def authenticate():
         authentication()
+
+
+class_widget = QWidget()
+class_widget.setGeometry(500, 250, 300, 150)
+class_widget.setWindowTitle("ajouter classe")
+
+
+class AddClassUi(QWidget):
+    def __init__(self, parent=class_widget):
+        super(AddClassUi, self).__init__(parent)
+        self.form = QFormLayout()
+        self.nom = QLineEdit()
+        self.niveau = QComboBox()
+        self.niveau.addItem("")
+        self.niveau.addItem("7ème année")
+        self.niveau.addItem("8ème année")
+        self.niveau.addItem("9ème année")
+        self.nbr_eleve = QLineEdit()
+        self.add = QPushButton("ajouter")
+        self.add.clicked.connect(self.persist_class)
+        self.form.addRow("nom classe: ", self.nom)
+        self.form.addRow("niveau: ", self.niveau)
+        self.form.addRow("nbr élève: ", self.nbr_eleve)
+        self.form.addRow(self.add)
+        self.setLayout(self.form)
+
+    def persist_class(self):
+        if self.nom.text().strip() == "" or self.niveau.currentText() == "" or self.nbr_eleve.text().strip() == "":
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText("Merci de remplir tous les champs")
+            msg.exec_()
+        else:
+            try:
+                data = (self.nom.text(), self.niveau.currentText(), self.nbr_eleve.text())
+                cursor.execute(''' INSERT INTO classe VALUES (?, ?, ?)''', data)
+                db.commit()
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Classe ajouté avec succès")
+                msg.exec_()
+            except Exception:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Warning)
+                msg.setText("Classe existe déja")
+                msg.exec_()
+
+
+def add_class():
+    add = AddClassUi()
+    class_widget.show()
+    add.show()
 
 
 db = sqlite3.connect('office.sqlite')
@@ -299,4 +359,17 @@ auth.setGeometry(500, 250, 300, 110)
 auth.show()
 main = MainWindow()
 main.setGeometry(0, 0, 1200, 1000)
+
+
+def authentication():
+    if auth.login.text() == "saad sboui" and auth.passwd.text() == "00000000":
+        auth.destroy()
+        main.show()
+    else:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText("Login ou mot de passe incorrect")
+        msg.exec_()
+
+
 sys.exit(app.exec_())
