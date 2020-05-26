@@ -181,7 +181,7 @@ class Tabs(QTabWidget):
         if self.level.currentText() == '':
             cursor.execute(''' SELECT nom_classe FROM classe ''')
         else:
-            cursor.execute(''' SELECT nom_classe FROM classe WHERE niveau = ?''', (self.level.currentText(), ))
+            cursor.execute(''' SELECT nom_classe FROM classe WHERE niveau = ?''', (self.level.currentText(),))
         list_classe = cursor.fetchall()
         for i in range(self.classe_list.count()):
             self.classe_list.removeItem(0)
@@ -211,7 +211,7 @@ class Tabs(QTabWidget):
         for e in liste:
             pdf_file.cell(100, 5, e[0], ln=0, align="R", border=1)
             pdf_file.cell(20, 5, e[1], ln=1, align="C", border=1)
-        pdf_file.output(self.classe_list.currentText()+".pdf")
+        pdf_file.output(self.classe_list.currentText() + ".pdf")
         pdf_file.close()
 
     def delete_classe(self):
@@ -252,11 +252,27 @@ class Tabs(QTabWidget):
         layout.addRow("Liste: ", self.result)
         self.classe.setLayout(layout)
 
-    def get_stats(self):
-        pass
+    @staticmethod
+    def get_stats(classe, gender):
+        cursor.execute(''' SELECT COUNT(*) FROM eleve WHERE classe = ? AND sexe = ? ''', (classe, gender))
+        return cursor.fetchall()
+
+    @staticmethod
+    def get_all_classes():
+        cursor.execute(''' SELECT * FROM classe ''')
+        return cursor.fetchall()
 
     def statisticsui(self):
-        pass
+        layout = QFormLayout()
+        hbox = QHBoxLayout()
+        layout.addRow("classe            Males             Femelles               Total", hbox)
+        for classe in self.get_all_classes():
+            res_male = str(self.get_stats(classe[0], "Male")[0][0])
+            res_femelle = str(self.get_stats(classe[0], "Femelle")[0][0])
+            res = classe[0] + "                      " + res_male + "                      " + \
+                res_femelle + "                            " + str(classe[-1])
+            layout.addRow(res, hbox)
+        self.statistics.setLayout(layout)
 
 
 class Auth(QWidget):
@@ -362,7 +378,7 @@ main.setGeometry(0, 0, 1200, 1000)
 
 
 def authentication():
-    if auth.login.text() == "saad sboui" and auth.passwd.text() == "00000000":
+    if auth.login.text().strip() == "saad sboui" and auth.passwd.text() == "00000000":
         auth.destroy()
         main.show()
     else:
