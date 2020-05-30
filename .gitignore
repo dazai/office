@@ -2,3 +2,5 @@
 venv
 test.py
 *.sqlite
+*.ttf
+*.pkl
